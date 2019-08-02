@@ -1,5 +1,12 @@
 import React from "react";
-import { Dimensions, StyleSheet, ScrollView, Text, View, FlatList } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  ScrollView,
+  Text,
+  View,
+  FlatList
+} from "react-native";
 import { compose, pure, setDisplayName } from "recompose";
 import TaskCard from "../../components/taskCard";
 
@@ -22,14 +29,14 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     backgroundColor: purple,
-    height: 150,
+    height: 100,
     paddingHorizontal: 10
   },
   headerText: {
     color: white,
     fontWeight: "700",
     fontSize: 20,
-    paddingTop: 30
+    paddingTop: 15
   },
   listContainer: {
     marginTop: -40,
@@ -41,34 +48,56 @@ const data = [
   {
     id: 1,
     title: "Fase de elaboración de presupuesto",
-    description: "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem."
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+    time: "2 dias",
+    picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
   },
   {
     id: 2,
     title: "Fase de investigación del proyecto",
-    description: "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem."
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+    time: "2 dias",
+    picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
   },
   {
     id: 3,
     title: "Fase de diseño",
-    description: "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem."
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+    time: "2 dias",
+    picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
   },
   {
     id: 4,
     title: "Fase de implementación del proyecto",
-    description: "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem."
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+    time: "2 dias",
+    picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
   },
   {
     id: 5,
     title: "Fase de revisión",
-    description: "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem."
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+    time: "2 dias",
+    picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
   }
 ];
 
 const keyExtractor = item => item.id.toString();
 
 // eslint-disable-next-line react/display-name, react/prop-types
-const renderItem = ({ item }) => <TaskCard title={item.title} description={item.description} />;
+const renderItem = ({ item }) => (
+  <TaskCard
+    title={item.title}
+    description={item.description}
+    time={item.time}
+    picture={item.picture}
+  />
+);
 
 const Home = compose(
   pure,
