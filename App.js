@@ -1,12 +1,17 @@
-import React, { Fragment, PureComponent } from "react";
-import AppNavigator from "./src/navigation";
+import React from "react";
+import { createStackNavigator, createAppContainer } from "react-navigation";
+import Home from "./src/screens/home"
 
-export default class App extends PureComponent<Props> {
-  render() {
-    return (
-        <Fragment>
-          <AppNavigator />
-        </Fragment>
-    );
-  }
-}
+const AppNavigator = createStackNavigator(
+    {
+        Home
+    },
+    {
+        defaultNavigationOptions: {
+            header: null
+        },
+        initialRouteName: "Home",
+    }
+);
+
+export default createAppContainer(AppNavigator);
