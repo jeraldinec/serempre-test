@@ -141,18 +141,18 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   picture: {
-    borderRadius: ios ? 100 : 100,
-    height: 34,
-    width: 34
+    borderRadius: ios ? 12 : 100,
+    height: 24,
+    width: 24
   },
   pictureBorder: {
     alignItems: "center",
     borderColor: purple,
-    borderRadius: ios ? 100 : 100,
+    borderRadius: ios ? 15 : 100,
     borderWidth: 1,
-    height: 40,
+    height: 30,
     justifyContent: "center",
-    width: 40
+    width: 30
   },
   pictureContainer: {
     alignItems: "flex-end",
@@ -216,7 +216,11 @@ const Home = compose(
   }) => (
     <TouchableOpacity style={styles.card} onPress={toggleModal}>
       <Text style={styles.titleText}>{title}</Text>
-      <Text style={styles.descriptionText}>{description}</Text>
+      <Text style={styles.descriptionText}>
+        {description.length > 16
+          ? `${description.substring(0, 16).toLowerCase()}...`
+          : description}
+      </Text>
       <View style={styles.info}>
         <View style={styles.time}>
           <MaterialIcon name="clock-outline" size={15} color={purple} />

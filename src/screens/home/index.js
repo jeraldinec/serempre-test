@@ -10,9 +10,18 @@ import {
   TextInput,
   Modal
 } from "react-native";
-import { compose, pure, setDisplayName, withStateHandlers } from "recompose";
+import {
+  compose,
+  pure,
+  setDisplayName,
+  withHandlers,
+  withStateHandlers
+} from "recompose";
 import TaskCard from "../../components/taskCard";
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import NumericInput from "react-native-numeric-input";
+import AsyncStorage from "@react-native-community/async-storage";
+import { withState } from "recompose/dist/Recompose.cjs";
 
 const white = "#fff";
 const purple = "#4f52ff";
@@ -77,6 +86,21 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     width: "90%"
   },
+  estimated: {
+    alignItems: "center",
+    flexDirection: "row"
+  },
+  estimatedLeft: {
+    flex: 1
+  },
+  estimatedRight: {
+    alignItems: "flex-end"
+  },
+  estimatedText: {
+    color: grey2,
+    fontSize: 13,
+    marginRight: 8
+  },
   floatButton: {
     alignItems: "center",
     backgroundColor: purple,
@@ -105,8 +129,13 @@ const styles = StyleSheet.create({
     borderColor: light,
     borderRadius: ios ? 100 : 100,
     borderWidth: 1,
+    fontSize: 14,
     height: 40,
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingHorizontal: 10
+  },
+  inputNumeric: {
+    fontSize: 14,
     paddingHorizontal: 10
   },
   listContainer: {
@@ -125,65 +154,76 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 15,
     textAlign: "center"
-  },
+  }
 });
 
-const data = [
-  // {
-  //   id: 1,
-  //   title: "Fase de elaboración de presupuesto",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-  //   time: "2 dias",
-  //   picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-  // },
-  // {
-  //   id: 2,
-  //   title: "Fase de investigación del proyecto",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-  //   time: "2 dias",
-  //   picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-  // },
-  // {
-  //   id: 3,
-  //   title: "Fase de diseño",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-  //   time: "2 dias",
-  //   picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-  // },
-  // {
-  //   id: 4,
-  //   title: "Fase de implementación del proyecto",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-  //   time: "2 dias",
-  //   picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-  // },
-  // {
-  //   id: 5,
-  //   title: "Fase de revisión",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-  //   time: "2 dias",
-  //   picture: "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-  // }
-];
+{
+  /*const data = [*/
+}
+{
+  /*  {*/
+}
+{
+  /*    id: 1,*/
+}
+//     title: "Fase de elaboración de presupuesto",
+//     description:
+//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+//     time: "2 dias",
+//     picture:
+//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
+//   },
+{
+  /*  {*/
+}
+{
+  /*    id: 2,*/
+}
+//     title: "Fase de investigación del proyecto",
+//     description:
+//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+{
+  /*    time: "2 dias",*/
+}
+//     picture:
+{
+  /*      "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"*/
+}
+{
+  /*  },*/
+}
+//   {
+//     id: 3,
+//     title: "Fase de diseño",
+//     description:
+//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+//     time: "2 dias",
+//     picture:
+//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
+//   },
+//   {
+//     id: 4,
+//     title: "Fase de implementación del proyecto",
+//     description:
+//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+//     time: "2 dias",
+//     picture:
+//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
+//   },
+//   {
+//     id: 5,
+//     title: "Fase de revisión",
+//     description:
+//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
+//     time: "2 dias",
+//     picture:
+//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
+//   }
+// ];
 
 const keyExtractor = item => item.id.toString();
 
-// eslint-disable-next-line react/display-name, react/prop-types
-const renderItem = ({ item }) => (
-  <TaskCard
-    title={item.title}
-    description={item.description}
-    time={item.time}
-    picture={item.picture}
-  />
-);
-
-const renderEmpty = ({ item }) => (
+const renderEmpty = () => (
   <View style={styles.card}>
     <Text style={styles.cardText}>No tienes tareas registradas aún.</Text>
     <Text style={styles.cardText}>¡Crea una nueva tarea!</Text>
@@ -192,6 +232,7 @@ const renderEmpty = ({ item }) => (
 
 const Home = compose(
   pure,
+  withState("data", "setData", []),
   withStateHandlers(
     { visible: false },
     {
@@ -200,65 +241,140 @@ const Home = compose(
       })
     }
   ),
-  setDisplayName("Home")
-)(({ visible, toggleModal }) => (
-  <View style={styles.bigContainer}>
-    <StatusBar backgroundColor={statusBar} barStyle="light-content" />
-    <View style={styles.header}>
-      <Text style={styles.headerText}>Adminsitrador de tareas</Text>
-    </View>
-    <View style={styles.listContainer}>
-      <FlatList
-        data={data}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        ListEmptyComponent={renderEmpty}
+  withHandlers({
+    // eslint-disable-next-line react/display-name, react/prop-types
+    renderItem: () => ({ item }) => (
+      <TaskCard
+        title={item.title}
+        description={item.description}
+        time={item.time}
+        picture={item.picture}
       />
-    </View>
-    <TouchableOpacity style={styles.floatButton} onPress={toggleModal}>
-      <MaterialIcon name="plus" size={30} color={white} />
-    </TouchableOpacity>
+    )
+  }),
+  withHandlers({
+    handleTitleChange: ({ handleChange }) => handleChange("title"),
+    handleTitleBlur: ({ handleBlur }) => handleBlur("title"),
+    handleDescriptionChange: ({ handleChange }) => handleChange("description"),
+    handleDescriptionBlur: ({ handleBlur }) => handleBlur("description"),
+    handleEmployeeChange: ({ handleChange }) => handleChange("employee"),
+    handleEmployeeBlur: ({ handleBlur }) => handleBlur("employee"),
+    handleTimeChange: ({ handleChange }) => handleChange("time")
+  }),
+  withHandlers({
+    addTask: () => () => {}
+  }),
+  setDisplayName("Home")
+)(
+  ({
+    visible,
+    toggleModal,
+    renderItem,
+    data,
+    handleTitleChange,
+    handleTitleBlur,
+    handleDescriptionChange,
+    handleDescriptionBlur,
+    handleEmployeeChange,
+    handleEmployeeBlur,
+    handleTimeChange
+  }) => (
+    <View style={styles.bigContainer}>
+      <StatusBar backgroundColor={statusBar} barStyle="light-content" />
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Adminsitrador de tareas</Text>
+      </View>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={data}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          ListEmptyComponent={renderEmpty}
+        />
+      </View>
+      <TouchableOpacity style={styles.floatButton} onPress={toggleModal}>
+        <MaterialIcon name="plus" size={30} color={white} />
+      </TouchableOpacity>
 
-    <Modal
-      openModal
-      animationType="slide"
-      transparent
-      visible={visible}
-      onRequestClose={toggleModal}
-    >
-      <View style={styles.modalContainer}>
-        <StatusBar backgroundColor={statusBarBlack} barStyle="light-content" />
-        <View style={styles.contentModal}>
-          <Text style={styles.titleModal}>Nueva tarea</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Título de la tarea"
+      <Modal
+        openModal
+        animationType="slide"
+        transparent
+        visible={visible}
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalContainer}>
+          <StatusBar
+            backgroundColor={statusBarBlack}
+            barStyle="light-content"
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Descripción"
-          />
-          <TextInput
-            style={styles.input}
-            keyboardType={"number-pad"}
-            placeholder="Tiempo estimado"
-          />
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={toggleModal}
-              hitSlop={hitSlop}
-            >
-              <Text style={styles.buttonCancel}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} hitSlop={hitSlop}>
-              <Text style={styles.buttonText}>Aceptar</Text>
-            </TouchableOpacity>
+          <View style={styles.contentModal}>
+            <Text style={styles.titleModal}>Nueva tarea</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Título de la tarea"
+              multiline
+              maxLength={32}
+              onchangeText={handleTitleChange}
+              onblur={handleTitleBlur}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Descripción"
+              multiline
+              onchangeText={handleDescriptionChange}
+              onblur={handleDescriptionBlur}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre del empleado encargado"
+              multiline
+              onchangeText={handleEmployeeChange}
+              onblur={handleEmployeeBlur}
+            />
+            <View style={styles.estimated}>
+              <View style={styles.estimatedLeft}>
+                <Text style={styles.estimatedText}>
+                  Tiempo estimado (Horas):
+                </Text>
+              </View>
+              <View style={styles.estimatedRight}>
+                <NumericInput
+                  // value={size}
+                  onChange={handleTimeChange}
+                  totalWidth={100}
+                  totalHeight={40}
+                  minValue={0}
+                  initValue={0}
+                  step={1}
+                  valueType="integer"
+                  rounded
+                  borderColor={light}
+                  textColor={black}
+                  inputStyle={styles.inputNumeric}
+                  iconStyle={{ color: white }}
+                  rightButtonBackgroundColor={purple}
+                  leftButtonBackgroundColor={purple}
+                />
+              </View>
+            </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={toggleModal}
+                hitSlop={hitSlop}
+              >
+                <Text style={styles.buttonCancel}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} hitSlop={hitSlop}>
+                <Text style={styles.buttonText}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </Modal>
-  </View>
-));
+      </Modal>
+    </View>
+  )
+);
 
 export default Home;
