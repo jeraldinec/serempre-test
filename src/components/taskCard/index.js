@@ -16,7 +16,6 @@ import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const white = "#fff";
 const purple = "#4f52ff";
-const statusBar = "#3b3dbf";
 const statusBarBlack = "#000";
 const black = "#333";
 const grey = "#999";
@@ -216,7 +215,6 @@ const Home = compose(
     toggleEmployeeModal
   }) => (
     <TouchableOpacity style={styles.card} onPress={toggleModal}>
-      <StatusBar backgroundColor={statusBar} barStyle="light-content" />
       <Text style={styles.titleText}>{title}</Text>
       <Text style={styles.descriptionText}>{description}</Text>
       <View style={styles.info}>
