@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Dimensions,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import {
   compose,
+  lifecycle,
   pure,
   setDisplayName,
   withHandlers,
@@ -19,220 +19,48 @@ import {
 } from "recompose";
 import TaskCard from "../../components/taskCard";
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import NumericInput from "react-native-numeric-input";
 import AsyncStorage from "@react-native-community/async-storage";
 import { withState } from "recompose/dist/Recompose.cjs";
+import { Formik } from "formik";
+import UUIDGenerator from "react-native-uuid-generator";
+import {
+  handleTextInput,
+  withNextInputAutoFocusForm,
+  withNextInputAutoFocusInput
+} from "react-native-formik";
+import * as Yup from "yup";
+import styles from "./styles";
 
 const white = "#fff";
-const purple = "#4f52ff";
 const statusBar = "#3b3dbf";
 const statusBarBlack = "#000";
-const black = "#333";
-const grey = "#999";
-const grey2 = "#555";
-const light = "#dedede";
-const transparency = "rgba(0, 0, 0, .7)";
 
 const isSmallScreen = Dimensions.get("window").width < 360;
 
 const hitSlop = { top: 15, bottom: 15, left: 15, right: 15 };
 
-const ios = Platform.OS === "ios";
-
-const styles = StyleSheet.create({
-  bigContainer: {
-    backgroundColor: white,
-    flex: 1
-  },
-  button: {
-    paddingHorizontal: 10
-  },
-  buttonCancel: {
-    color: grey2,
-    fontSize: 15,
-    fontWeight: "700"
-  },
-  buttonContainer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 40
-  },
-  buttonText: {
-    color: purple,
-    fontSize: 15,
-    fontWeight: "700"
-  },
-  card: {
-    backgroundColor: white,
-    borderRadius: 15,
-    elevation: 3,
-    marginBottom: 15,
-    marginHorizontal: 20,
-    minHeight: 100,
-    paddingHorizontal: 10,
-    paddingVertical: 30
-  },
-  cardText: {
-    color: grey,
-    fontSize: 15,
-    textAlign: "center"
-  },
-  contentModal: {
-    backgroundColor: white,
-    borderRadius: 15,
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    width: "90%"
-  },
-  estimated: {
-    alignItems: "center",
-    flexDirection: "row"
-  },
-  estimatedLeft: {
-    flex: 1
-  },
-  estimatedRight: {
-    alignItems: "flex-end"
-  },
-  estimatedText: {
-    color: grey2,
-    fontSize: 13,
-    marginRight: 8
-  },
-  floatButton: {
-    alignItems: "center",
-    backgroundColor: purple,
-    borderRadius: ios ? 30 : 100,
-    bottom: 15,
-    elevation: 5,
-    height: 60,
-    justifyContent: "center",
-    position: "absolute",
-    right: 15,
-    width: 60
-  },
-  header: {
-    alignItems: "center",
-    backgroundColor: purple,
-    height: 100,
-    paddingHorizontal: 10
-  },
-  headerText: {
-    color: white,
-    fontWeight: "700",
-    fontSize: 20,
-    paddingTop: 15
-  },
-  input: {
-    borderColor: light,
-    borderRadius: ios ? 100 : 100,
-    borderWidth: 1,
-    fontSize: 14,
-    height: 40,
-    marginBottom: 12,
-    paddingHorizontal: 10
-  },
-  inputNumeric: {
-    fontSize: 14,
-    paddingHorizontal: 10
-  },
-  listContainer: {
-    marginTop: -40,
-    marginBottom: 100
-  },
-  modalContainer: {
-    alignItems: "center",
-    backgroundColor: transparency,
-    flex: 1,
-    justifyContent: "center"
-  },
-  titleModal: {
-    color: black,
-    fontSize: 15,
-    fontWeight: "700",
-    marginBottom: 15,
-    textAlign: "center"
-  }
-});
-
-{
-  /*const data = [*/
-}
-{
-  /*  {*/
-}
-{
-  /*    id: 1,*/
-}
-//     title: "Fase de elaboración de presupuesto",
-//     description:
-//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-//     time: "2 dias",
-//     picture:
-//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-//   },
-{
-  /*  {*/
-}
-{
-  /*    id: 2,*/
-}
-//     title: "Fase de investigación del proyecto",
-//     description:
-//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-{
-  /*    time: "2 dias",*/
-}
-//     picture:
-{
-  /*      "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"*/
-}
-{
-  /*  },*/
-}
-//   {
-//     id: 3,
-//     title: "Fase de diseño",
-//     description:
-//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-//     time: "2 dias",
-//     picture:
-//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-//   },
-//   {
-//     id: 4,
-//     title: "Fase de implementación del proyecto",
-//     description:
-//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-//     time: "2 dias",
-//     picture:
-//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-//   },
-//   {
-//     id: 5,
-//     title: "Fase de revisión",
-//     description:
-//       "Lorem ipsum dolor sit amet consectetur adipiscing elit ullamcorper, justo class cursus turpis purus maecenas sem.",
-//     time: "2 dias",
-//     picture:
-//       "https://www.rd.com/wp-content/uploads/2017/09/01-shutterstock_476340928-Irina-Bg-1024x683.jpg"
-//   }
-// ];
+const MyInput = compose(
+  handleTextInput,
+  withNextInputAutoFocusInput
+)(TextInput);
+const Form = withNextInputAutoFocusForm(View);
 
 const keyExtractor = item => item.id.toString();
 
-const renderEmpty = () => (
-  <View style={styles.card}>
-    <Text style={styles.cardText}>No tienes tareas registradas aún.</Text>
-    <Text style={styles.cardText}>¡Crea una nueva tarea!</Text>
-  </View>
-);
+const validationSchema = Yup.object().shape({
+  title: Yup.string()
+    .required("El título es requerido")
+    .max(32, "El título no debe ser mayor a 32 caracteres"),
+  description: Yup.string().required("La descripción es requerida"),
+  employee: Yup.string().required("El nombre del empleado es requerido"),
+  time: Yup.string().required("El tiempo estimado es requerido")
+});
 
 const Home = compose(
   pure,
   withState("data", "setData", []),
+  withState("completed", "setCompleted", 0),
+  withState("pending", "setPending", 0),
   withStateHandlers(
     { visible: false },
     {
@@ -242,139 +70,216 @@ const Home = compose(
     }
   ),
   withHandlers({
-    // eslint-disable-next-line react/display-name, react/prop-types
-    renderItem: () => ({ item }) => (
+    renderItem: ({ setData }) => ({ item }) => (
       <TaskCard
         title={item.title}
         description={item.description}
+        employee={item.employee}
         time={item.time}
-        picture={item.picture}
+        worked={item.worked}
+        id={item.id}
+        setData={setData}
       />
     )
   }),
   withHandlers({
-    handleTitleChange: ({ handleChange }) => handleChange("title"),
-    handleTitleBlur: ({ handleBlur }) => handleBlur("title"),
-    handleDescriptionChange: ({ handleChange }) => handleChange("description"),
-    handleDescriptionBlur: ({ handleBlur }) => handleBlur("description"),
-    handleEmployeeChange: ({ handleChange }) => handleChange("employee"),
-    handleEmployeeBlur: ({ handleBlur }) => handleBlur("employee"),
-    handleTimeChange: ({ handleChange }) => handleChange("time")
+    statistics: ({ data, setCompleted, setPending }) => () => {
+      let foundCompleted = data.filter(function(el) {
+        return el.time - el.worked <= 0;
+      });
+      if (foundCompleted) {
+        setCompleted(foundCompleted.length);
+      }
+      let foundPending = data.filter(function(el) {
+        return el.time - el.worked > 0;
+      });
+      if (foundPending) {
+        setPending(foundPending.length);
+      }
+    }
   }),
-  withHandlers({
-    addTask: () => () => {}
+  lifecycle({
+    async componentDidMount() {
+      const { setData } = this.props;
+      try {
+        let storage = await AsyncStorage.getItem("task");
+        if (storage) {
+          storage = JSON.parse(storage);
+          if (storage.length > 0) {
+            setData(storage);
+          }
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    componentDidUpdate(prevProps) {
+      const { data, statistics } = this.props;
+      if (prevProps.data !== data) {
+        statistics();
+      }
+    }
   }),
   setDisplayName("Home")
-)(
-  ({
-    visible,
-    toggleModal,
-    renderItem,
-    data,
-    handleTitleChange,
-    handleTitleBlur,
-    handleDescriptionChange,
-    handleDescriptionBlur,
-    handleEmployeeChange,
-    handleEmployeeBlur,
-    handleTimeChange
-  }) => (
-    <View style={styles.bigContainer}>
-      <StatusBar backgroundColor={statusBar} barStyle="light-content" />
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Adminsitrador de tareas</Text>
-      </View>
-      <View style={styles.listContainer}>
-        <FlatList
-          data={data}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          ListEmptyComponent={renderEmpty}
-        />
-      </View>
-      <TouchableOpacity style={styles.floatButton} onPress={toggleModal}>
-        <MaterialIcon name="plus" size={30} color={white} />
-      </TouchableOpacity>
-
-      <Modal
-        openModal
-        animationType="slide"
-        transparent
-        visible={visible}
-        onRequestClose={toggleModal}
-      >
-        <View style={styles.modalContainer}>
-          <StatusBar
-            backgroundColor={statusBarBlack}
-            barStyle="light-content"
-          />
-          <View style={styles.contentModal}>
-            <Text style={styles.titleModal}>Nueva tarea</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Título de la tarea"
-              multiline
-              maxLength={32}
-              onchangeText={handleTitleChange}
-              onblur={handleTitleBlur}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Descripción"
-              multiline
-              onchangeText={handleDescriptionChange}
-              onblur={handleDescriptionBlur}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre del empleado encargado"
-              multiline
-              onchangeText={handleEmployeeChange}
-              onblur={handleEmployeeBlur}
-            />
-            <View style={styles.estimated}>
-              <View style={styles.estimatedLeft}>
-                <Text style={styles.estimatedText}>
-                  Tiempo estimado (Horas):
-                </Text>
-              </View>
-              <View style={styles.estimatedRight}>
-                <NumericInput
-                  // value={size}
-                  onChange={handleTimeChange}
-                  totalWidth={100}
-                  totalHeight={40}
-                  minValue={0}
-                  initValue={0}
-                  step={1}
-                  valueType="integer"
-                  rounded
-                  borderColor={light}
-                  textColor={black}
-                  inputStyle={styles.inputNumeric}
-                  iconStyle={{ color: white }}
-                  rightButtonBackgroundColor={purple}
-                  leftButtonBackgroundColor={purple}
-                />
-              </View>
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={toggleModal}
-                hitSlop={hitSlop}
-              >
-                <Text style={styles.buttonCancel}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.button} hitSlop={hitSlop}>
-                <Text style={styles.buttonText}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+)(({ visible, toggleModal, data, setData, renderItem, completed, pending }) => (
+  <View style={styles.bigContainer}>
+    <StatusBar backgroundColor={statusBar} barStyle="light-content" />
+    <View style={styles.header}>
+      <Text style={styles.headerText}>Adminsitrador de tareas</Text>
+      <View style={styles.taskRow}>
+        <View style={styles.taskLeft}>
+          <Text style={styles.taskNumber}>{data.length}</Text>
+          <Text style={styles.taskTitle}>Tareas</Text>
         </View>
-      </Modal>
+        <View style={styles.taskCenter}>
+          <Text style={styles.taskNumber}>{completed}</Text>
+          <Text style={styles.taskTitle}>Completadas</Text>
+        </View>
+        <View style={styles.taskRight}>
+          <Text style={styles.taskNumber}>{pending}</Text>
+          <Text style={styles.taskTitle}>Pendientes</Text>
+        </View>
+      </View>
     </View>
-  )
-);
+    <View style={styles.listContainer}>
+      {data.length > 0 ? (
+        <FlatList
+          keyExtractor={keyExtractor}
+          data={data}
+          renderItem={renderItem}
+          keyboardShouldPersistTaps="always"
+        />
+      ) : (
+        <View style={styles.card}>
+          <Text style={styles.cardText}>No tienes tareas registradas aún.</Text>
+          <Text style={styles.cardText}>¡Crea una nueva tarea!</Text>
+        </View>
+      )}
+    </View>
+    <TouchableOpacity style={styles.floatButton} onPress={toggleModal}>
+      <MaterialIcon name="plus" size={30} color={white} />
+    </TouchableOpacity>
+
+    <Modal
+      openModal
+      animationType="slide"
+      transparent
+      visible={visible}
+      onRequestClose={toggleModal}
+    >
+      <View style={styles.modalContainer}>
+        <StatusBar backgroundColor={statusBarBlack} barStyle="light-content" />
+        <View style={styles.contentModal}>
+          <Text style={styles.titleModal}>Nueva tarea</Text>
+          <Formik
+            onSubmit={() => {}}
+            validationSchema={validationSchema}
+            render={({ values, errors, isValid }) => {
+              return (
+                <Form>
+                  <MyInput
+                    placeholder="Título de la tarea *"
+                    name="title"
+                    type="name"
+                    style={styles.input}
+                  />
+                  <MyInput
+                    placeholder="Descripción *"
+                    name="description"
+                    type="name"
+                    style={styles.input}
+                  />
+                  <MyInput
+                    placeholder="Nombre del empleado *"
+                    name="employee"
+                    type="name"
+                    style={styles.input}
+                  />
+                  <MyInput
+                    placeholder="Tiempo estimado (Horas) *"
+                    name="time"
+                    type="digits"
+                    keyboardType="numeric"
+                    style={styles.input}
+                  />
+
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={toggleModal}
+                      hitSlop={hitSlop}
+                    >
+                      <Text style={styles.buttonCancel}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.button}
+                      disabled={!isValid}
+                      onPress={async () => {
+                        try {
+                          let storage = await AsyncStorage.getItem("task");
+                          if (storage) {
+                            storage = JSON.parse(storage);
+                            if (storage.length > 0) {
+                              values.worked = 0;
+                              await UUIDGenerator.getRandomUUID().then(uuid => {
+                                values.id = uuid;
+                              });
+                              storage.push(values);
+                              AsyncStorage.setItem(
+                                "task",
+                                JSON.stringify(storage)
+                              );
+                              setData(storage);
+                            } else {
+                              let array = [];
+                              values.worked = 0;
+                              await UUIDGenerator.getRandomUUID().then(uuid => {
+                                values.id = uuid;
+                              });
+                              array.push(values);
+                              AsyncStorage.setItem(
+                                "task",
+                                JSON.stringify(array)
+                              );
+                              setData(array);
+                            }
+                          } else {
+                            let array = [];
+                            values.worked = 0;
+                            await UUIDGenerator.getRandomUUID().then(uuid => {
+                              values.id = uuid;
+                            });
+                            array.push(values);
+                            AsyncStorage.setItem("task", JSON.stringify(array));
+                            setData(array);
+                          }
+                          toggleModal();
+                          // alert(JSON.stringify(values));
+                        } catch (e) {
+                          alert(e);
+                        }
+                      }}
+                      hitSlop={hitSlop}
+                    >
+                      <Text
+                        style={
+                          isValid
+                            ? styles.buttonText
+                            : styles.buttonTextDisabled
+                        }
+                      >
+                        Guardar
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </Form>
+              );
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  </View>
+));
 
 export default Home;

@@ -1,10 +1,9 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {
   Dimensions,
   Image,
   Modal,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -13,175 +12,32 @@ import {
 } from "react-native";
 import { compose, pure, setDisplayName, withStateHandlers } from "recompose";
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-community/async-storage";
+import { Formik } from "formik";
+import {
+  handleTextInput,
+  withNextInputAutoFocusForm,
+  withNextInputAutoFocusInput
+} from "react-native-formik";
+import * as Yup from "yup";
+import styles from "./styles";
+
+const MyInput = compose(
+  handleTextInput,
+  withNextInputAutoFocusInput
+)(TextInput);
+const Form = withNextInputAutoFocusForm(View);
 
 const white = "#fff";
-const purple = "#4f52ff";
 const statusBarBlack = "#000";
-const black = "#333";
 const grey = "#999";
-const grey2 = "#555";
-const light = "#dedede";
-const transparency = "rgba(0, 0, 0, .7)";
 
 const isSmallScreen = Dimensions.get("window").width < 360;
 
 const hitSlop = { top: 15, bottom: 15, left: 15, right: 15 };
 
-const ios = Platform.OS === "ios";
-
-const styles = StyleSheet.create({
-  button: {
-    paddingHorizontal: 10
-  },
-  buttonCancel: {
-    color: grey2,
-    fontSize: 15,
-    fontWeight: "700"
-  },
-  buttonContainer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 50
-  },
-  buttonText: {
-    color: purple,
-    fontSize: 15,
-    fontWeight: "700"
-  },
-  card: {
-    backgroundColor: white,
-    borderRadius: 15,
-    elevation: 3,
-    marginBottom: 15,
-    marginHorizontal: 20,
-    minHeight: 100,
-    padding: 10
-  },
-  closeModal: {
-    alignItems: "center",
-    left: 0,
-    justifyContent: "center",
-    position: "absolute",
-    top: 0,
-    right: 0
-  },
-  contentModal: {
-    backgroundColor: white,
-    borderRadius: 15,
-    marginHorizontal: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 15,
-    width: "90%"
-  },
-  descriptionText: {
-    color: grey,
-    fontSize: 14,
-    marginBottom: 10
-  },
-  employeeContentModal: {
-    backgroundColor: white,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    elevation: 10,
-    justifyContent: "flex-end",
-    minHeight: 130,
-    paddingHorizontal: 10,
-    paddingVertical: 10
-  },
-  employeeModalContainer: {
-    backgroundColor: "transparent",
-    flex: 1,
-    justifyContent: "flex-end"
-  },
-  employeeName: {
-    color: black,
-    fontSize: 18,
-    fontWeight: "700"
-  },
-  employeeType: {
-    color: grey2,
-    fontSize: 14
-  },
-  info: {
-    alignItems: "flex-end",
-    flexDirection: "row"
-  },
-  infoEmployee: {
-    flexDirection: "row"
-  },
-  infoPicture: {
-    borderRadius: ios ? 100 : 100,
-    height: 60,
-    width: 60
-  },
-  infoPictureBorder: {
-    alignItems: "center",
-    borderColor: purple,
-    borderRadius: ios ? 100 : 100,
-    borderWidth: 1.5,
-    height: 70,
-    justifyContent: "center",
-    width: 70
-  },
-  infoEmployeeRight: {
-    marginLeft: 10
-  },
-  input: {
-    borderColor: light,
-    borderRadius: ios ? 100 : 100,
-    borderWidth: 1,
-    height: 40,
-    paddingHorizontal: 10
-  },
-  modalContainer: {
-    alignItems: "center",
-    backgroundColor: transparency,
-    flex: 1,
-    justifyContent: "center"
-  },
-  picture: {
-    borderRadius: ios ? 12 : 100,
-    height: 24,
-    width: 24
-  },
-  pictureBorder: {
-    alignItems: "center",
-    borderColor: purple,
-    borderRadius: ios ? 15 : 100,
-    borderWidth: 1,
-    height: 30,
-    justifyContent: "center",
-    width: 30
-  },
-  pictureContainer: {
-    alignItems: "flex-end",
-    flex: 0
-  },
-  time: {
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row"
-  },
-  timeText: {
-    color: grey2,
-    fontSize: 14,
-    fontWeight: "700",
-    marginLeft: 3
-  },
-  titleModal: {
-    color: black,
-    fontSize: 15,
-    fontWeight: "700",
-    marginBottom: 15,
-    textAlign: "center"
-  },
-  titleText: {
-    color: black,
-    fontSize: 15,
-    fontWeight: "700",
-    marginBottom: 10
-  }
+const validationSchema = Yup.object().shape({
+  worked: Yup.string().required()
 });
 
 const Home = compose(
@@ -208,13 +64,22 @@ const Home = compose(
     title,
     description,
     time,
-    picture,
+    employee,
+    worked,
+    id,
     toggleModal,
     visible,
     visibleEmployee,
-    toggleEmployeeModal
+    toggleEmployeeModal,
+    setData
   }) => (
-    <TouchableOpacity style={styles.card} onPress={toggleModal}>
+    <TouchableOpacity
+      style={[
+        styles.card,
+        time - worked > 0 ? styles.borderPending : styles.borderCompleted
+      ]}
+      onPress={time - worked > 0 ? toggleModal : null}
+    >
       <Text style={styles.titleText}>{title}</Text>
       <Text style={styles.descriptionText}>
         {description.length > 16
@@ -222,17 +87,36 @@ const Home = compose(
           : description}
       </Text>
       <View style={styles.info}>
-        <View style={styles.time}>
-          <MaterialIcon name="clock-outline" size={15} color={purple} />
-          <Text style={styles.timeText}>{`${time} restantes`}</Text>
-        </View>
+        {time - worked <= 0 ? (
+          <View style={styles.time}>
+            <View style={styles.timeCompleted}>
+              <MaterialIcon name={"check"} size={13} color={white} />
+              <Text style={styles.timeText}>Completado</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.time}>
+            <View style={styles.timePending}>
+              <MaterialIcon name={"clock-outline"} size={13} color={white} />
+              <Text style={styles.timeText}>{`${Number(
+                (time - worked).toFixed(2)
+              )} horas restantes`}</Text>
+            </View>
+          </View>
+        )}
         <View style={styles.pictureContainer}>
           <TouchableOpacity
             style={styles.pictureBorder}
             onPress={toggleEmployeeModal}
             hitSlop={hitSlop}
           >
-            <Image source={{ uri: picture }} style={styles.picture} />
+            <Image
+              source={{
+                uri:
+                  "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+              }}
+              style={styles.picture}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -251,23 +135,73 @@ const Home = compose(
           />
           <View style={styles.contentModal}>
             <Text style={styles.titleModal}>Tiempo trabajado</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType={"decimal-pad"}
-              placeholder="Introduzca el tiempo restante"
+            <Formik
+              onSubmit={() => {}}
+              validationSchema={validationSchema}
+              render={({ values, isValid }) => {
+                return (
+                  <Form>
+                    <MyInput
+                      placeholder="Introduzca el tiempo restante"
+                      name="worked"
+                      type="name"
+                      keyboardType={"decimal-pad"}
+                      style={styles.input}
+                    />
+
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        style={styles.button}
+                        onPress={toggleModal}
+                        hitSlop={hitSlop}
+                      >
+                        <Text style={styles.buttonCancel}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.button}
+                        disabled={!isValid}
+                        onPress={async () => {
+                          try {
+                            let storage = await AsyncStorage.getItem("task");
+                            if (storage) {
+                              storage = JSON.parse(storage);
+                              let found = storage.filter(function(el) {
+                                return el.id === id;
+                              })[0];
+                              if (found) {
+                                found.worked =
+                                  parseFloat(found.worked) +
+                                  parseFloat(values.worked);
+                              }
+                              AsyncStorage.setItem(
+                                "task",
+                                JSON.stringify(storage)
+                              );
+                              setData(storage);
+                            } else {
+                            }
+                            toggleModal();
+                          } catch (e) {
+                            alert(e);
+                          }
+                        }}
+                        hitSlop={hitSlop}
+                      >
+                        <Text
+                          style={
+                            isValid
+                              ? styles.buttonText
+                              : styles.buttonTextDisabled
+                          }
+                        >
+                          Guardar
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </Form>
+                );
+              }}
             />
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={toggleModal}
-                hitSlop={hitSlop}
-              >
-                <Text style={styles.buttonCancel}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.button} hitSlop={hitSlop}>
-                <Text style={styles.buttonText}>Aceptar</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </Modal>
@@ -303,13 +237,16 @@ const Home = compose(
                       hitSlop={hitSlop}
                     >
                       <Image
-                        source={{ uri: picture }}
+                        source={{
+                          uri:
+                            "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
+                        }}
                         style={styles.infoPicture}
                       />
                     </View>
                   </View>
                   <View style={styles.infoEmployeeRight}>
-                    <Text style={styles.employeeName}>Jeraldine Silvera</Text>
+                    <Text style={styles.employeeName}>{employee}</Text>
                     <Text style={styles.employeeType}>Programador</Text>
                   </View>
                 </View>
